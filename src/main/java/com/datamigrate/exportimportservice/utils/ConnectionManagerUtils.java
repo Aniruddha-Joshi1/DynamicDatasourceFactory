@@ -34,6 +34,7 @@ public class ConnectionManagerUtils {
         if (connection != null){
             try{
                 connection.close();
+                log.info("Closed the jdbc connection");
             } catch (SQLException ex){
                 log.warn("Failed to close connection: {}", ex.getMessage());
             }

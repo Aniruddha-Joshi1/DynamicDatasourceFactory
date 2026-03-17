@@ -1,8 +1,10 @@
 package com.datamigrate.exportimportservice.controller;
 
 import com.datamigrate.exportimportservice.model.ApiResponse;
+import com.datamigrate.exportimportservice.model.ExportResponseModel;
 import com.datamigrate.exportimportservice.model.ImportExportRequestModel;
 import com.datamigrate.exportimportservice.model.ImportResponseModel;
+import com.datamigrate.exportimportservice.service.ExportService;
 import com.datamigrate.exportimportservice.service.ImportService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.opencsv.exceptions.CsvValidationException;
@@ -21,10 +23,12 @@ import java.io.IOException;
 @RequestMapping("/api/datatransfer")
 public class DataTransferController {
     private final ImportService importService;
+    private final ExportService exportService;
 
     @Autowired
-    public DataTransferController(ImportService importService){
+    public DataTransferController(ImportService importService, ExportService exportService){
         this.importService = importService;
+        this.exportService = exportService;
     }
 
     @PostMapping(value = "/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -53,6 +57,18 @@ public class DataTransferController {
         } catch (Exception e){
             log.error("Import Failed");
             return ResponseEntity.badRequest().body(ApiResponse.error("Import failed: " + e.getMessage()));
+        }
+    }
+
+    @PostMapping("/export")
+    public ResponseEntity<ApiResponse<ExportResponseModel>> exportData(@RequestBody ImportExportRequestModel request) {
+        log.info("Export request received. Exporting from schema: {}, table: {}", request.getSchemaDetails().getSchema(), request.getSchemaDetails().getTableName());
+        try{
+            String outputFilePath = exportService.exportToCsv(request);
+            return ResponseEntity.ok().body(ApiResponse.success("Data exported successfully to path: " + outputFilePath, null));
+        } catch (Exception ex){
+            log.error("Error while exporting: ", ex);
+            return ResponseEntity.badRequest().body(ApiResponse.error("Export failed: " + ex.getMessage()));
         }
     }
 }
