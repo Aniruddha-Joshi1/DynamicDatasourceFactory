@@ -10,6 +10,7 @@ import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
@@ -40,7 +41,12 @@ public class ImportService {
     }
 
     public void readFileAndInsertData(MultipartFile file, JdbcTemplate jdbc, ImportExportRequestModel importRequest) throws IOException, CsvValidationException {
-        try (CSVReader csvReader = new CSVReader(new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8))) {
+        try (CSVReader csvReader = new CSVReader(
+                new BufferedReader(
+                        new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8)
+                )
+            )
+        ) {
             String[] headers = csvReader.readNext();
             if (headers == null || headers.length == 0){
                 throw new IllegalArgumentException("CSV file has no header row");

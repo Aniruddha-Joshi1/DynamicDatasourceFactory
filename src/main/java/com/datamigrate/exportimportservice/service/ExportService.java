@@ -29,7 +29,7 @@ public class ExportService {
 
     public String exportToCsv(ImportExportRequestModel request){
         String sqlQuery = buildSqlQuery(request);
-        log.info("Starting import from the schema='{}' and table = '{}'", request.getSchemaDetails().getSchema(),
+        log.info("Starting export from the schema='{}' and table = '{}'", request.getSchemaDetails().getSchema(),
                 request.getSchemaDetails().getTableName());
         String fileName = generateFileName(request.getSchemaDetails().getTableName());
         Path outdirPath = Paths.get(outputDir.toUri());
