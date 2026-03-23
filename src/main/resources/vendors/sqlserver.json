@@ -1,0 +1,100 @@
+{
+  "vendorId": "sqlserver",
+  "displayName": "SQL Server",
+  "operation": "both",
+  "jdbcDriverClass": "com.microsoft.sqlserver.jdbc.SQLServerDriver",
+  "jdbcUrlTemplate": "jdbc:sqlserver://{host}:{port};databaseName={databaseName};encrypt={encrypt};trustServerCertificate={trustServerCertificate};",
+  "defaultPort": 1433,
+  "connectionDetails": [
+    {
+      "name": "host",
+      "label": "Host",
+      "type": "text",
+      "required": true,
+      "defaultValue": "localhost",
+      "placeholder": "e.g. localhost or 192.168.1.1",
+      "description": "Hostname or IP address of the SQL Server instance"
+    },
+    {
+      "name": "port",
+      "label": "Port",
+      "type": "number",
+      "required": false,
+      "defaultValue": 1433,
+      "placeholder": "1433",
+      "description": "Port on which SQL Server is listening (default: 1433)"
+    },
+    {
+      "name": "instanceName",
+      "label": "Instance Name",
+      "type": "text",
+      "required": false,
+      "defaultValue": null,
+      "placeholder": "e.g. SQLEXPRESS",
+      "description": "Named SQL Server instance (leave blank for default instance)"
+    },
+    {
+      "name": "databaseName",
+      "label": "Database Name",
+      "type": "text",
+      "required": true,
+      "defaultValue": null,
+      "placeholder": "e.g. master",
+      "description": "Name of the target SQL Server database"
+    },
+    {
+      "name": "encrypt",
+      "label": "Encrypt Connection",
+      "type": "boolean",
+      "required": false,
+      "defaultValue": true,
+      "placeholder": null,
+      "description": "Whether to encrypt data sent between the client and server"
+    },
+    {
+      "name": "trustServerCertificate",
+      "label": "Trust Server Certificate",
+      "type": "boolean",
+      "required": false,
+      "defaultValue": true,
+      "placeholder": null,
+      "description": "If true, the driver will not validate the server SSL certificate (useful for dev/test)"
+    },
+    {
+      "name": "integratedSecurity",
+      "label": "Use Windows Authentication (Integrated Security)",
+      "type": "boolean",
+      "required": false,
+      "defaultValue": false,
+      "placeholder": null,
+      "description": "Use Windows authentication instead of SQL Server authentication. If true, username and password are not required."
+    },
+    {
+      "name": "loginTimeout",
+      "label": "Login Timeout (seconds)",
+      "type": "number",
+      "required": false,
+      "defaultValue": 30,
+      "placeholder": "30",
+      "description": "Number of seconds to wait before timing out a connection attempt"
+    },
+    {
+      "name": "applicationName",
+      "label": "Application Name",
+      "type": "text",
+      "required": false,
+      "defaultValue": null,
+      "placeholder": "e.g. my-spring-app",
+      "description": "Optional application name for tracing in SQL Server logs"
+    },
+    {
+      "name": "sendStringParametersAsUnicode",
+      "label": "Send String Parameters as Unicode",
+      "type": "boolean",
+      "required": false,
+      "defaultValue": true,
+      "placeholder": null,
+      "description": "Determines whether string parameters are sent to the server as Unicode or ANSI"
+    }
+  ]
+}

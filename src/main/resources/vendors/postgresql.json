@@ -1,0 +1,78 @@
+{
+  "vendorId": "postgresql",
+  "displayName": "PostgreSQL",
+  "operation": "both",
+  "jdbcDriverClass": "org.postgresql.Driver",
+  "jdbcUrlTemplate": "jdbc:postgresql://{host}:{port}/{databaseName}",
+  "defaultPort": 5432,
+  "connectionDetails": [
+    {
+      "name": "host",
+      "label": "Host",
+      "type": "text",
+      "required": true,
+      "defaultValue": "localhost",
+      "placeholder": "e.g. localhost or 192.168.1.1",
+      "description": "Hostname or IP address of the PostgreSQL server"
+    },
+    {
+      "name": "port",
+      "label": "Port",
+      "type": "number",
+      "required": false,
+      "defaultValue": 5432,
+      "placeholder": "5432",
+      "description": "Port on which PostgreSQL is running (default: 5432)"
+    },
+    {
+      "name": "databaseName",
+      "label": "Database Name",
+      "type": "text",
+      "required": true,
+      "defaultValue": null,
+      "placeholder": "e.g. mydb",
+      "description": "Name of the target PostgreSQL database"
+    },
+    {
+      "name": "ssl",
+      "label": "Enable SSL",
+      "type": "boolean",
+      "required": false,
+      "defaultValue": false,
+      "placeholder": null,
+      "description": "Whether to use SSL for the connection"
+    },
+    {
+      "name": "sslmode",
+      "label": "SSL Mode",
+      "type": "select",
+      "required": false,
+      "defaultValue": "prefer",
+      "options": ["disable", "allow", "prefer", "require", "verify-ca", "verify-full"],
+      "placeholder": null,
+      "description": "SSL mode for the connection. Only applicable when SSL is enabled.",
+      "dependsOn": {
+        "field": "ssl",
+        "value": true
+      }
+    },
+    {
+      "name": "connectTimeout",
+      "label": "Connection Timeout (seconds)",
+      "type": "number",
+      "required": false,
+      "defaultValue": 30,
+      "placeholder": "30",
+      "description": "Maximum number of seconds to wait for a connection"
+    },
+    {
+      "name": "applicationName",
+      "label": "Application Name",
+      "type": "text",
+      "required": false,
+      "defaultValue": null,
+      "placeholder": "e.g. my-spring-app",
+      "description": "Optional application name shown in pg_stat_activity"
+    }
+  ]
+}

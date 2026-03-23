@@ -1,0 +1,16 @@
+{
+  "vendors": [
+    {
+      "vendorId": "postgresql",
+      "displayName": "PostgreSQL",
+      "operation": "both",
+      "defaultPort": 5432
+    },
+    {
+      "vendorId": "sqlserver",
+      "displayName": "SQL Server",
+      "operation": "both",
+      "defaultPort": 1433
+    }
+  ]
+}

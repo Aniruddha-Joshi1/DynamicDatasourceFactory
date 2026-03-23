@@ -5,6 +5,7 @@ import com.datamigrate.exportimportservice.utils.ConnectionManagerUtils;
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvValidationException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 import org.springframework.stereotype.Service;
@@ -25,18 +26,24 @@ public class ImportService {
     // Step1: Read the file and store the data in a data structure
     // Step2: Write an insert query with the data
     // Step3: Execute the insert query using the jdbc connection to insert data into DB
+    private final ConnectionManagerUtils connectionManagerUtils;
+
+    @Autowired
+    public ImportService(ConnectionManagerUtils connectionManagerUtils){
+        this.connectionManagerUtils = connectionManagerUtils;
+    }
 
     public void importFromFile(MultipartFile file, ImportExportRequestModel importRequest) throws CsvValidationException, IOException {
         String fileName = file.getOriginalFilename();
         log.info("Starting import for the file='{}' and it will be imported into table = '{}'", fileName,
                 importRequest.getSchemaDetails().getTableName());
 
-        Connection connection = ConnectionManagerUtils.getConnection(importRequest.getDatabaseConfig());
+        Connection connection = connectionManagerUtils.getConnection(importRequest.getDatabaseConfig());
         try {
             JdbcTemplate jdbc = new JdbcTemplate(new SingleConnectionDataSource(connection, true));
             readFileAndInsertData(file, jdbc, importRequest);
         } finally {
-            ConnectionManagerUtils.closeConnection(connection);
+            connectionManagerUtils.closeConnection(connection);
         }
     }
 

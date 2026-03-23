@@ -4,6 +4,7 @@ import com.datamigrate.exportimportservice.model.ImportExportRequestModel;
 import com.datamigrate.exportimportservice.utils.ConnectionManagerUtils;
 import com.opencsv.CSVWriter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.SingleConnectionDataSource;
@@ -27,6 +28,13 @@ public class ExportService {
     @Value("${app.output.dir}")
     Path outputDir;
 
+    private final ConnectionManagerUtils connectionManagerUtils;
+
+    @Autowired
+    public ExportService(ConnectionManagerUtils connectionManagerUtils){
+        this.connectionManagerUtils = connectionManagerUtils;
+    }
+
     public String exportToCsv(ImportExportRequestModel request){
         String sqlQuery = buildSqlQuery(request);
         log.info("Starting export from the schema='{}' and table = '{}'", request.getSchemaDetails().getSchema(),
@@ -34,7 +42,7 @@ public class ExportService {
         String fileName = generateFileName(request.getSchemaDetails().getTableName());
         Path outdirPath = Paths.get(outputDir.toUri());
         Path filePath = outdirPath.resolve(fileName);
-        Connection connection = ConnectionManagerUtils.getConnection(request.getDatabaseConfig());
+        Connection connection = connectionManagerUtils.getConnection(request.getDatabaseConfig());
         try{
             if(!Files.exists(outdirPath)){
                 Files.createDirectories(outputDir);
@@ -44,7 +52,7 @@ public class ExportService {
         } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {
-            ConnectionManagerUtils.closeConnection(connection);
+            connectionManagerUtils.closeConnection(connection);
         }
     }
 

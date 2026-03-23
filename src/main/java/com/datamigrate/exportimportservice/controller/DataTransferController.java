@@ -1,11 +1,9 @@
 package com.datamigrate.exportimportservice.controller;
 
-import com.datamigrate.exportimportservice.model.ApiResponse;
-import com.datamigrate.exportimportservice.model.ExportResponseModel;
-import com.datamigrate.exportimportservice.model.ImportExportRequestModel;
-import com.datamigrate.exportimportservice.model.ImportResponseModel;
+import com.datamigrate.exportimportservice.model.*;
 import com.datamigrate.exportimportservice.service.ExportService;
 import com.datamigrate.exportimportservice.service.ImportService;
+import com.datamigrate.exportimportservice.service.VendorConfigService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.opencsv.exceptions.CsvValidationException;
 import jakarta.validation.Valid;
@@ -24,14 +22,23 @@ import java.io.IOException;
 public class DataTransferController {
     private final ImportService importService;
     private final ExportService exportService;
+    private final VendorConfigService vendorConfigService;
 
     @Autowired
-    public DataTransferController(ImportService importService, ExportService exportService){
+    public DataTransferController(ImportService importService, ExportService exportService, VendorConfigService vendorConfigService){
         this.importService = importService;
         this.exportService = exportService;
+        this.vendorConfigService = vendorConfigService;
     }
 
-    @PostMapping(value = "/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @GetMapping("/vendor-config")
+    public ResponseEntity<ApiResponse<VendorConfig>> getVendorConfig(@RequestParam String vendor) {
+        return vendorConfigService.getVendorConfig(vendor)
+                .map(config -> ResponseEntity.ok(ApiResponse.success("Vendor config fetched successfully", config)))
+                .orElse(ResponseEntity.badRequest().body(ApiResponse.error("Unknown vendor: " + vendor)));
+    }
+
+    @PostMapping(value = "/publish", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ApiResponse<ImportResponseModel>> importData(@RequestPart("file")MultipartFile file, @RequestPart("request") @Valid String requestJson) throws IOException, CsvValidationException {
         ObjectMapper mapper = new ObjectMapper();
         ImportExportRequestModel request = mapper.readValue(requestJson, ImportExportRequestModel.class);
