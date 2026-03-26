@@ -1,5 +1,6 @@
 package com.datamigrate.exportimportservice.model;
 
+import com.datamigrate.exportimportservice.enums.FileFormat;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
@@ -12,4 +13,6 @@ public class ImportExportRequestModel {
     private SchemaDetailsModel schemaDetails;
 
     private int batchSize = 100;
+
+    private FileFormat fileFormat = FileFormat.CSV;
 }

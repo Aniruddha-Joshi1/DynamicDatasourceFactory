@@ -40,29 +40,21 @@ public class DataTransferController {
 
     @PostMapping(value = "/publish", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ApiResponse<ImportResponseModel>> importData(@RequestPart("file")MultipartFile file, @RequestPart("request") @Valid String requestJson) throws IOException, CsvValidationException {
-        ObjectMapper mapper = new ObjectMapper();
-        ImportExportRequestModel request = mapper.readValue(requestJson, ImportExportRequestModel.class);
         if (file.isEmpty()) {
             return ResponseEntity
                     .badRequest()
                     .body(ApiResponse.error("File cannot be empty"));
         }
 
-        if (!file.getOriginalFilename().toLowerCase().endsWith(".csv")){
-            return ResponseEntity
-                    .badRequest()
-                    .body(ApiResponse.error("Uploaded file has to be a csv file"));
-        }
+        ObjectMapper mapper = new ObjectMapper();
+        ImportExportRequestModel request = mapper.readValue(requestJson, ImportExportRequestModel.class);
 
-        log.info("Import request received for file = '{}' to be imported into table = '{}'",
-                file.getOriginalFilename(),
-                request.getSchemaDetails().getTableName());
-
-        try{
-            importService.importFromFile(file, request);
+        try {
+            importService.importFile(file, request);
             return ResponseEntity.ok(ApiResponse.success("Data imported successfully", null));
-        } catch (Exception e){
-            log.error("Import Failed");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(ApiResponse.error(e.getMessage()));
+        } catch (Exception e) {
             return ResponseEntity.badRequest().body(ApiResponse.error("Import failed: " + e.getMessage()));
         }
     }
@@ -71,8 +63,10 @@ public class DataTransferController {
     public ResponseEntity<ApiResponse<ExportResponseModel>> exportData(@RequestBody ImportExportRequestModel request) {
         log.info("Export request received. Exporting from schema: {}, table: {}", request.getSchemaDetails().getSchema(), request.getSchemaDetails().getTableName());
         try{
-            String outputFilePath = exportService.exportToCsv(request);
+            String outputFilePath = exportService.exportFile(request);
             return ResponseEntity.ok().body(ApiResponse.success("Data exported successfully to path: " + outputFilePath, null));
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.badRequest().body(ApiResponse.error(ex.getMessage()));
         } catch (Exception ex){
             log.error("Error while exporting: ", ex);
             return ResponseEntity.badRequest().body(ApiResponse.error("Export failed: " + ex.getMessage()));
