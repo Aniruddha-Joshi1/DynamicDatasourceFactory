@@ -9,10 +9,6 @@ import java.nio.channels.SeekableByteChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-/**
- * A Parquet InputFile backed by Java NIO — no Hadoop, no winutils.exe, no HADOOP_HOME.
- * Works on any OS.
- */
 public class ParquetInputFileUtils implements InputFile {
 
     private final Path path;

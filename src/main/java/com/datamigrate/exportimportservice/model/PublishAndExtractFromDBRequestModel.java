@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 @Data
-public class ImportExportRequestModel {
+public class PublishAndExtractFromDBRequestModel {
     @NotNull(message = "Database configuration is required")
     private DatabaseConfigModel databaseConfig;
 
@@ -15,4 +15,6 @@ public class ImportExportRequestModel {
     private int batchSize = 100;
 
     private FileFormat fileFormat = FileFormat.CSV;
+
+    private String filePath = "";
 }

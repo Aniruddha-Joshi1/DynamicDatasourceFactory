@@ -3,6 +3,6 @@ package com.datamigrate.exportimportservice.model;
 import lombok.Data;
 
 @Data
-public class ImportResponseModel {
+public class PublishToDBResponseModel {
     private String message;
 }

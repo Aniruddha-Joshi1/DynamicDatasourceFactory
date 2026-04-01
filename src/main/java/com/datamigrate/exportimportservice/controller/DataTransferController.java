@@ -1,18 +1,16 @@
 package com.datamigrate.exportimportservice.controller;
 
 import com.datamigrate.exportimportservice.model.*;
-import com.datamigrate.exportimportservice.service.ExportService;
-import com.datamigrate.exportimportservice.service.ImportService;
+import com.datamigrate.exportimportservice.service.ExtractFromDBService;
+import com.datamigrate.exportimportservice.service.PublishIntoDBService;
 import com.datamigrate.exportimportservice.service.VendorConfigService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.opencsv.exceptions.CsvValidationException;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 
@@ -20,14 +18,14 @@ import java.io.IOException;
 @Slf4j
 @RequestMapping("/api/datatransfer")
 public class DataTransferController {
-    private final ImportService importService;
-    private final ExportService exportService;
+    private final PublishIntoDBService publishIntoDBService;
+    private final ExtractFromDBService extractFromDBService;
     private final VendorConfigService vendorConfigService;
 
     @Autowired
-    public DataTransferController(ImportService importService, ExportService exportService, VendorConfigService vendorConfigService){
-        this.importService = importService;
-        this.exportService = exportService;
+    public DataTransferController(PublishIntoDBService publishIntoDBService, ExtractFromDBService extractFromDBService, VendorConfigService vendorConfigService){
+        this.publishIntoDBService = publishIntoDBService;
+        this.extractFromDBService = extractFromDBService;
         this.vendorConfigService = vendorConfigService;
     }
 
@@ -38,19 +36,14 @@ public class DataTransferController {
                 .orElse(ResponseEntity.badRequest().body(ApiResponse.error("Unknown vendor: " + vendor)));
     }
 
-    @PostMapping(value = "/publish", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<ApiResponse<ImportResponseModel>> importData(@RequestPart("file")MultipartFile file, @RequestPart("request") @Valid String requestJson) throws IOException, CsvValidationException {
-        if (file.isEmpty()) {
-            return ResponseEntity
-                    .badRequest()
-                    .body(ApiResponse.error("File cannot be empty"));
-        }
+    @PostMapping(value = "/publishToDB")
+    public ResponseEntity<ApiResponse<PublishToDBResponseModel>> publishDataIntoTheFile(@RequestBody @Valid String requestJson) throws IOException, CsvValidationException {
 
         ObjectMapper mapper = new ObjectMapper();
-        ImportExportRequestModel request = mapper.readValue(requestJson, ImportExportRequestModel.class);
+        PublishAndExtractFromDBRequestModel request = mapper.readValue(requestJson, PublishAndExtractFromDBRequestModel.class);
 
         try {
-            importService.importFile(file, request);
+            publishIntoDBService.publishDataIntoDB(request);
             return ResponseEntity.ok(ApiResponse.success("Data imported successfully", null));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(ApiResponse.error(e.getMessage()));
@@ -59,17 +52,17 @@ public class DataTransferController {
         }
     }
 
-    @PostMapping("/export")
-    public ResponseEntity<ApiResponse<ExportResponseModel>> exportData(@RequestBody ImportExportRequestModel request) {
-        log.info("Export request received. Exporting from schema: {}, table: {}", request.getSchemaDetails().getSchema(), request.getSchemaDetails().getTableName());
+    @PostMapping("/extractFromDB")
+    public ResponseEntity<ApiResponse<ExtractFromDBResponseModel>> extractDataFromTheFile(@RequestBody PublishAndExtractFromDBRequestModel request) {
+        log.info("Exportacting from schema: {}, table: {}", request.getSchemaDetails().getSchema(), request.getSchemaDetails().getTableName());
         try{
-            String outputFilePath = exportService.exportFile(request);
-            return ResponseEntity.ok().body(ApiResponse.success("Data exported successfully to path: " + outputFilePath, null));
+            String outputFilePath = extractFromDBService.extractDataFromFile(request);
+            return ResponseEntity.ok().body(ApiResponse.success("Data extracted successfully and saved to the path: " + outputFilePath, null));
         } catch (IllegalArgumentException ex) {
             return ResponseEntity.badRequest().body(ApiResponse.error(ex.getMessage()));
         } catch (Exception ex){
-            log.error("Error while exporting: ", ex);
-            return ResponseEntity.badRequest().body(ApiResponse.error("Export failed: " + ex.getMessage()));
+            log.error("Error while extracting: ", ex);
+            return ResponseEntity.badRequest().body(ApiResponse.error("Extracting failed: " + ex.getMessage()));
         }
     }
 }
